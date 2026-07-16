@@ -52,7 +52,7 @@ describe("snapshot", () => {
     const snap = {
       agp: "9.0.0",
       kotlin: "2.2.10",
-      gradle: "9.0.0",
+      gradle: "9.1.0",
       compileSdk: 35,
       targetSdk: 35,
       minSdk: 24,

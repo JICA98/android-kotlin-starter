@@ -37,7 +37,7 @@ Each scaffolder release ships two pinned Android stacks. Run
 
 | Channel | AGP | Kotlin | Gradle | compileSdk |
 |---|---|---|---|---|
-| stable | 9.0.0 | 2.2.10 | 9.0.0 | 35 |
+| stable | 9.0.0 | 2.2.10 | 9.1.0 | 35 |
 | bleeding-edge | 9.1.1 | 2.4.0 | 9.5.1 | 37 |
 
 Default channel is **stable**. Use `--stack-channel=bleeding-edge` for the latest edge pins.
