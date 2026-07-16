@@ -14,7 +14,11 @@ Flags:
   -n, --name <string>       App name
   -p, --package <string>    Android application id (e.g. com.example.app)
   -a, --arch <multi|single> Project shape
-      --stack               Print pinned stack snapshot and exit
+      --stack-channel <stable|bleeding-edge>
+                            Stack pins (default: stable)
+      --with-agents         Install Android agent skills under .agents/skills
+      --no-agents           Skip agent skills (default when non-interactive)
+      --stack               Print pinned stack snapshot(s) and exit
   -v, --version             Print scaffolder version and exit
   -h, --help                Print this message and exit
       --force               Overwrite a non-empty target directory
@@ -59,9 +63,14 @@ async function main(argv: string[]): Promise<number> {
 
   if (flags.stack) {
     const repoRoot = repoRootFromHere();
-    for (const ch of ["stable", "bleeding-edge"] as const) {
-      const snap = await loadSnapshot(repoRoot, ch);
-      log(`${ch}: ${formatSnapshotBanner(snap)}`);
+    if (flags.stackChannel) {
+      const snap = await loadSnapshot(repoRoot, flags.stackChannel);
+      log(formatSnapshotBanner(snap, flags.stackChannel));
+    } else {
+      for (const ch of ["stable", "bleeding-edge"] as const) {
+        const snap = await loadSnapshot(repoRoot, ch);
+        log(`${ch}: ${formatSnapshotBanner(snap)}`);
+      }
     }
     return 0;
   }
@@ -79,6 +88,9 @@ async function main(argv: string[]): Promise<number> {
   }
 
   const isTTY = Boolean(process.stdout.isTTY);
+  const withAgentsProvided =
+    flags.withAgents === true ? true : flags.noAgents === true ? false : undefined;
+
   let inputs;
   try {
     inputs = await collectInteractiveInputs({
@@ -87,6 +99,8 @@ async function main(argv: string[]): Promise<number> {
         name: flags.name,
         package: flags.package,
         arch: flags.arch,
+        stackChannel: flags.stackChannel,
+        withAgents: withAgentsProvided,
       },
       isTTY,
     });

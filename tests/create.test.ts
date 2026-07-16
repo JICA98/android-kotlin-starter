@@ -26,6 +26,8 @@ describe("runCreate", () => {
         name: "Demo",
         package: "com.example.demo",
         arch: "single",
+        stackChannel: "stable",
+        withAgents: false,
       },
       isTTY: false,
     });
@@ -34,6 +36,11 @@ describe("runCreate", () => {
     expect(rootStat.isDirectory()).toBe(true);
     const settings = await readFile(join(out, "Demo", "settings.gradle.kts"), "utf8");
     expect(settings).toContain('rootProject.name = "Demo"');
+    const gi = await readFile(join(out, "Demo", ".gitignore"), "utf8");
+    expect(gi).toContain("local.properties");
+    expect(gi).toContain("*.apk");
+    expect(gi).toContain(".cxx/");
+    expect(gi).toContain("!keystore/test.jks");
   });
 
   test("refuses to write into a non-empty existing dir without --force", async () => {
@@ -48,6 +55,8 @@ describe("runCreate", () => {
         name: "Demo",
         package: "com.example.demo",
         arch: "single",
+        stackChannel: "stable",
+        withAgents: false,
       },
       isTTY: false,
     });
@@ -67,6 +76,8 @@ describe("runCreate", () => {
         name: "Demo",
         package: "com.example.demo",
         arch: "single",
+        stackChannel: "stable",
+        withAgents: false,
       },
       isTTY: false,
       force: true,

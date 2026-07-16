@@ -1,4 +1,4 @@
-import { text, select, isCancel } from "@clack/prompts";
+import { text, select, confirm, isCancel } from "@clack/prompts";
 import { resolve } from "node:path";
 
 export type InteractiveAnswers = {
@@ -6,6 +6,8 @@ export type InteractiveAnswers = {
   name: string;
   package: string;
   arch: "multi" | "single";
+  stackChannel: "stable" | "bleeding-edge";
+  withAgents: boolean;
 };
 
 export type CollectOpts = {
@@ -20,16 +22,16 @@ export async function collectInteractiveInputs(
   const { provided, isTTY } = opts;
   const cwd = opts.cwd ?? process.cwd();
 
-  const missing: string[] = [];
-  if (provided.projectDir === undefined) missing.push("--projectDir");
-  if (provided.name === undefined) missing.push("--name");
-  if (provided.package === undefined) missing.push("--package");
-  if (provided.arch === undefined) missing.push("--arch");
+  const missingCore: string[] = [];
+  if (provided.projectDir === undefined) missingCore.push("projectDir");
+  if (provided.name === undefined) missingCore.push("--name");
+  if (provided.package === undefined) missingCore.push("--package");
+  if (provided.arch === undefined) missingCore.push("--arch");
 
-  if (missing.length > 0) {
+  if (missingCore.length > 0) {
     if (!isTTY) {
       throw new Error(
-        `Missing required input: ${missing.join(", ")}. Re-run in a TTY or pass them as flags.`,
+        `Missing required input: ${missingCore.join(", ")}. Re-run in a TTY or pass them as flags.`,
       );
     }
     if (provided.projectDir === undefined) {
@@ -64,11 +66,44 @@ export async function collectInteractiveInputs(
     }
   }
 
+  // Channel + agents: independent of core flags
+  if (provided.stackChannel === undefined) {
+    if (!isTTY) {
+      provided.stackChannel = "stable";
+    } else {
+      const v = await select({
+        message: "Stack channel?",
+        options: [
+          { value: "stable", label: "stable", hint: "production-safe pins" },
+          { value: "bleeding-edge", label: "bleeding-edge", hint: "latest edge pins" },
+        ],
+        initialValue: "stable",
+      });
+      if (isCancel(v)) throw new Error("aborted");
+      provided.stackChannel = v as "stable" | "bleeding-edge";
+    }
+  }
+
+  if (provided.withAgents === undefined) {
+    if (!isTTY) {
+      provided.withAgents = false;
+    } else {
+      const v = await confirm({
+        message: "Install Android agent skills into .agents/skills?",
+        initialValue: false,
+      });
+      if (isCancel(v)) throw new Error("aborted");
+      provided.withAgents = Boolean(v);
+    }
+  }
+
   const projectDir = resolve(cwd, provided.projectDir!);
   return {
     projectDir,
     name: provided.name!,
     package: provided.package!,
     arch: provided.arch!,
+    stackChannel: provided.stackChannel!,
+    withAgents: provided.withAgents!,
   };
 }

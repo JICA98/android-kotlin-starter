@@ -13,6 +13,8 @@ export type CreateInputs = {
   name: string;
   package: string;
   arch: "multi" | "single";
+  stackChannel: "stable" | "bleeding-edge";
+  withAgents: boolean;
 };
 
 export type CreateOpts = {
@@ -79,7 +81,7 @@ export async function runCreate(opts: CreateOpts): Promise<CreateResult> {
     if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
   }
 
-  const snap = await loadSnapshot(repoRoot, "stable");
+  const snap = await loadSnapshot(repoRoot, inputs.stackChannel);
   const tokens = buildTokens(snap, inputs);
   const templateRoot = join(repoRoot, "templates", inputs.arch);
 
@@ -92,14 +94,17 @@ export async function runCreate(opts: CreateOpts): Promise<CreateResult> {
   }
 
   if (dryRun) {
-    ok(`would scaffold ${inputs.arch} template into ${targetDir}`);
+    ok(
+      `would scaffold ${inputs.arch} template into ${targetDir}` +
+        (inputs.withAgents ? " (with agents)" : ""),
+    );
     return { exitCode: 0, stdout: "dry-run", stderr: "" };
   }
 
   await renderTemplate({ templateRoot, outDir: targetDir, tokens });
 
   ok(`Created ${targetDir}/${inputs.name} from template ${inputs.arch}`);
-  header(`Stack: ${formatSnapshotBanner(snap)}`);
+  header(`Stack: ${formatSnapshotBanner(snap, inputs.stackChannel)}`);
 
   if (!noInstall) {
     log("");
