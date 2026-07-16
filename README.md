@@ -35,10 +35,10 @@ npx create-android@0.2.0 my-app
 Each scaffolder release ships two pinned Android stacks. Run
 `npx create-android@0.2.0 --stack` to print both.
 
-| Channel | AGP | Kotlin | Gradle | compileSdk |
-|---|---|---|---|---|
-| stable | 9.0.0 | 2.2.10 | 9.1.0 | 35 |
-| bleeding-edge | 9.1.1 | 2.4.0 | 9.5.1 | 37 |
+| Channel | AGP | Kotlin | Gradle | compileSdk | Notes |
+|---|---|---|---|---|---|
+| stable | 9.1.1 | 2.4.0 | 9.5.1 | 35 | Production API (SDK 35) on AGP 9 tooling |
+| bleeding-edge | 9.1.1 | 2.4.0 | 9.5.1 | 37 | Latest API (SDK 37) + edge Compose BOM |
 
 Default channel is **stable**. Use `--stack-channel=bleeding-edge` for the latest edge pins.
 

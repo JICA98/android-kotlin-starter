@@ -8,13 +8,14 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 describe("snapshot", () => {
   test("loadSnapshot reads stable channel", async () => {
     const snap = await loadSnapshot(repoRoot, "stable");
-    expect(snap.agp).toBe("9.0.0");
-    expect(snap.kotlin).toBe("2.2.10");
+    expect(snap.agp).toBe("9.1.1");
+    expect(snap.kotlin).toBe("2.4.0");
+    expect(snap.gradle).toBe("9.5.1");
     expect(snap.compileSdk).toBe(35);
     expect(snap.targetSdk).toBe(35);
     expect(snap.minSdk).toBe(24);
     expect(snap.composeBom).toBe("2025.12.01");
-    expect(snap.hilt).toBe("2.56.2");
+    expect(snap.hilt).toBe("2.59.2");
   });
 
   test("loadSnapshot reads bleeding-edge channel", async () => {
@@ -50,19 +51,20 @@ describe("snapshot", () => {
 
   test("formatSnapshotBanner prefixes channel when provided", () => {
     const snap = {
-      agp: "9.0.0",
-      kotlin: "2.2.10",
-      gradle: "9.1.0",
+      agp: "9.1.1",
+      kotlin: "2.4.0",
+      gradle: "9.5.1",
       compileSdk: 35,
       targetSdk: 35,
       minSdk: 24,
       ndk: "28.2.13676358",
       composeBom: "2025.12.01",
-      hilt: "2.56.2",
+      hilt: "2.59.2",
     };
     const banner = formatSnapshotBanner(snap, "stable");
     expect(banner.startsWith("stable · ")).toBe(true);
-    expect(banner).toContain("AGP 9.0.0");
+    expect(banner).toContain("AGP 9.1.1");
+    expect(banner).toContain("compileSdk 35");
   });
 
   test("formatSnapshotBanner is stable (deterministic ordering)", () => {

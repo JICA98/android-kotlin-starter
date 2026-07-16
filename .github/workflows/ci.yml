@@ -6,13 +6,11 @@ on:
     paths-ignore:
       - '*.md'
       - 'docs/**'
-      - '.github/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
       - '*.md'
       - 'docs/**'
-      - '.github/**'
       - 'LICENSE'
 
 jobs:
@@ -35,6 +33,10 @@ jobs:
   render-smoke:
     runs-on: ubuntu-latest
     needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        stack-channel: [stable, bleeding-edge]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -46,14 +48,33 @@ jobs:
           java-version: 17
       - uses: android-actions/setup-android@v3
       - run: bun install
-      - name: Scaffold single
+      - name: Scaffold single (${{ matrix.stack-channel }})
         run: |
-          bun run src/cli.ts /tmp/out/single --name=Smoke --package=com.example.smoke --arch=single --no-install
+          bun run src/cli.ts /tmp/out/single \
+            --name=Smoke \
+            --package=com.example.smoke \
+            --arch=single \
+            --stack-channel=${{ matrix.stack-channel }} \
+            --no-install
           ls /tmp/out/single/Smoke
-      - name: Scaffold multi
+      - name: Scaffold multi (${{ matrix.stack-channel }})
         run: |
-          bun run src/cli.ts /tmp/out/multi --name=Smoke --package=com.example.smoke --arch=multi --no-install
+          bun run src/cli.ts /tmp/out/multi \
+            --name=Smoke \
+            --package=com.example.smoke \
+            --arch=multi \
+            --stack-channel=${{ matrix.stack-channel }} \
+            --no-install
           ls /tmp/out/multi/Smoke
+      - name: Assert stack tokens (${{ matrix.stack-channel }})
+        run: |
+          set -euo pipefail
+          CHANNEL="${{ matrix.stack-channel }}"
+          EXPECT_SDK=$(bun -e "const s=require('./stack/${CHANNEL}.json'); process.stdout.write(String(s.compileSdk))")
+          EXPECT_AGP=$(bun -e "const s=require('./stack/${CHANNEL}.json'); process.stdout.write(s.agp)")
+          grep -q "compileSdk = ${EXPECT_SDK}" /tmp/out/single/Smoke/app/build.gradle.kts
+          grep -q "${EXPECT_AGP}" /tmp/out/multi/Smoke/gradle/libs.versions.toml
+          echo "OK ${CHANNEL}: compileSdk=${EXPECT_SDK} agp=${EXPECT_AGP}"
       - name: Gradle help (single)
         run: |
           cd /tmp/out/single/Smoke

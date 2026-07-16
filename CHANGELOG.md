@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Default stack channel is `stable`.
 - Replaced `stack/snapshot.json` with channel-specific snapshot files.
 - README examples pin `create-android@0.2.0`.
+- CI `render-smoke` matrix runs both `stable` and `bleeding-edge` stack channels.
+- Stable pins use AGP 9–compatible tooling (Hilt 2.59.2+) with compileSdk/targetSdk 35.
 
 ## [0.1.0]
 
