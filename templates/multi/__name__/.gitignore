@@ -1,7 +1,36 @@
+# Gradle
 .gradle/
 build/
+**/build/
+
+# Local config
 local.properties
+
+# Android Studio / IntelliJ
 .idea/
 *.iml
-.DS_Store
+*.ipr
+*.iws
+.navigation/
 captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Keystores (keep test keystore trackable)
+*.jks
+*.keystore
+!keystore/test.jks
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kotlin / misc
+*.class
+*.log
+.kotlin/
