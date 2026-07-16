@@ -11,6 +11,13 @@
         "@types/bun": "latest",
         "typescript": "^5.7.0",
       },
+      "optionalDependencies": {
+        "create-android-darwin-arm64": "0.0.0-dev",
+        "create-android-darwin-x64": "0.0.0-dev",
+        "create-android-linux-arm64": "0.0.0-dev",
+        "create-android-linux-x64": "0.0.0-dev",
+        "create-android-windows-x64": "0.0.0-dev",
+      },
     },
   },
   "packages": {
