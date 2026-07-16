@@ -46,11 +46,35 @@ async function checkArch(arch: "single" | "multi"): Promise<string[]> {
   return errors;
 }
 
+async function checkSnapshots(): Promise<string[]> {
+  const errors: string[] = [];
+  const required = [
+    "agp", "kotlin", "gradle", "compileSdk", "targetSdk", "minSdk",
+    "ndk", "composeBom", "hilt",
+  ] as const;
+  for (const channel of ["stable", "bleeding-edge"] as const) {
+    const path = join(ROOT, "stack", `${channel}.json`);
+    try {
+      const raw = await readFile(path, "utf8");
+      const snap = JSON.parse(raw) as Record<string, unknown>;
+      for (const k of required) {
+        if (snap[k] === undefined || snap[k] === null || snap[k] === "") {
+          errors.push(`${path}: missing or empty key ${k}`);
+        }
+      }
+    } catch (e) {
+      errors.push(`${path}: ${(e as Error).message}`);
+    }
+  }
+  return errors;
+}
+
 async function main() {
   const errors: string[] = [];
   for (const arch of ["single", "multi"] as const) {
     errors.push(...(await checkArch(arch)));
   }
+  errors.push(...(await checkSnapshots()));
   if (errors.length > 0) {
     console.error("check-snapshot failed:");
     for (const e of errors) console.error(`  - ${e}`);

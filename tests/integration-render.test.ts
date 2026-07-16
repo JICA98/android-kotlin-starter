@@ -20,7 +20,7 @@ afterEach(async () => {
 
 describe("single template smoke render", () => {
   test("renders the whole tree with token substitution", async () => {
-    const snap = await loadSnapshot(repoRoot);
+    const snap = await loadSnapshot(repoRoot, "stable");
     const tokens = {
       name: "DemoApp",
       package: "com.example.demo",
@@ -63,7 +63,7 @@ describe("multi template smoke render", () => {
   test("renders the multi-arch tree", async () => {
     const out2 = await mkdtemp(join(tmpdir(), "smoke-multi-"));
     try {
-      const snap = await loadSnapshot(repoRoot);
+      const snap = await loadSnapshot(repoRoot, "stable");
       const tokens = {
         name: "DemoApp",
         package: "com.example.demo",

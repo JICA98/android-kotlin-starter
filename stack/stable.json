@@ -1,0 +1,12 @@
+{
+  "agp": "9.0.0",
+  "kotlin": "2.2.10",
+  "gradle": "9.0.0",
+  "compileSdk": 35,
+  "targetSdk": 35,
+  "minSdk": 24,
+  "ndk": "28.2.13676358",
+  "composeBom": "2025.12.01",
+  "hilt": "2.56.2",
+  "notes": "Conservative AGP 9–compatible matrix for production starters (0.2.0)."
+}

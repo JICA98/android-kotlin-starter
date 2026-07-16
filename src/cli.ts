@@ -59,8 +59,10 @@ async function main(argv: string[]): Promise<number> {
 
   if (flags.stack) {
     const repoRoot = repoRootFromHere();
-    const snap = await loadSnapshot(repoRoot);
-    log(formatSnapshotBanner(snap));
+    for (const ch of ["stable", "bleeding-edge"] as const) {
+      const snap = await loadSnapshot(repoRoot, ch);
+      log(`${ch}: ${formatSnapshotBanner(snap)}`);
+    }
     return 0;
   }
 

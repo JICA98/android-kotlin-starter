@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+export type StackChannel = "stable" | "bleeding-edge";
+
 export type Snapshot = {
   agp: string;
   kotlin: string;
@@ -14,15 +16,17 @@ export type Snapshot = {
   notes?: string;
 };
 
-export async function loadSnapshot(repoRoot: string): Promise<Snapshot> {
-  const path = resolve(repoRoot, "stack/snapshot.json");
+export async function loadSnapshot(
+  repoRoot: string,
+  channel: StackChannel,
+): Promise<Snapshot> {
+  const path = resolve(repoRoot, "stack", `${channel}.json`);
   const raw = await readFile(path, "utf8");
   return JSON.parse(raw) as Snapshot;
 }
 
-export function formatSnapshotBanner(s: Snapshot): string {
-  // Order is fixed for determinism.
-  return [
+export function formatSnapshotBanner(s: Snapshot, channel?: StackChannel): string {
+  const parts = [
     `AGP ${s.agp}`,
     `Kotlin ${s.kotlin}`,
     `Gradle ${s.gradle}`,
@@ -30,5 +34,7 @@ export function formatSnapshotBanner(s: Snapshot): string {
     `targetSdk ${s.targetSdk}`,
     `minSdk ${s.minSdk}`,
     `NDK ${s.ndk}`,
-  ].join(" · ");
+  ];
+  const body = parts.join(" · ");
+  return channel ? `${channel} · ${body}` : body;
 }
