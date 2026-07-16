@@ -1,6 +1,6 @@
 {
   "name": "create-android",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scaffold a new Android project from a versioned template snapshot.",
   "type": "module",
   "bin": { "create-android": "./bin/shim.js" },

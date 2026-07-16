@@ -6,13 +6,13 @@ Works with `npx` and `bunx`.
 ## Quick start
 
 ```sh
-npx create-android my-app
+npx create-android@0.2.0 my-app
 ```
 
 Or pin a specific scaffolder version:
 
 ```sh
-npx create-android@1.4.2 my-app
+npx create-android@0.2.0 my-app
 ```
 
 ## Flags
@@ -22,18 +22,25 @@ npx create-android@1.4.2 my-app
 | `-n, --name <name>` | App name (PascalCase). |
 | `-p, --package <id>` | Android application id (e.g. `com.example.myapp`). |
 | `-a, --arch <multi\|single>` | `multi` (NowInAndroid-style) or `single` (single module with feature folders). |
-| `--stack` | Print the pinned stack snapshot. |
+| `--stack-channel <stable\|bleeding-edge>` | Stack pins. Default: `stable`. |
+| `--with-agents` | Install Android agent skills into `.agents/skills/`. |
+| `--no-agents` | Skip agent skills (default when non-interactive). |
+| `--stack` | Print the pinned stack snapshot(s). With `--stack-channel`, print that channel only. |
 | `--force` | Overwrite a non-empty target directory. |
 | `--dry-run` | Render to a temp dir, print summary, do not write. |
 | `--no-install` | Skip the "Next steps" printout (for CI). |
 
 ## Pinned stack
 
-Each scaffolder release ships a pinned Android stack. Run `npx create-android my-app --stack` to see it.
+Each scaffolder release ships two pinned Android stacks. Run
+`npx create-android@0.2.0 --stack` to print both.
 
-| Scaffolder | AGP | Kotlin | Gradle | compileSdk |
+| Channel | AGP | Kotlin | Gradle | compileSdk |
 |---|---|---|---|---|
-| 0.1.0 | 9.1.1 | 2.4.0 | 9.5.1 | 37 |
+| stable | 9.0.0 | 2.2.10 | 9.0.0 | 35 |
+| bleeding-edge | 9.1.1 | 2.4.0 | 9.5.1 | 37 |
+
+Default channel is **stable**. Use `--stack-channel=bleeding-edge` for the latest edge pins.
 
 ## Agents
 
@@ -44,10 +51,12 @@ an Android project, run the scaffolder with all flags provided to avoid
 interactive prompts:
 
 ```sh
-npx create-android /path/to/project \
+npx create-android@0.2.0 /path/to/project \
   --name=MyApp \
   --package=com.example.myapp \
   --arch=single \
+  --stack-channel=stable \
+  --with-agents \
   --no-install
 ```
 
@@ -60,23 +69,37 @@ npx create-android /path/to/project \
 | `--arch` | `single` or `multi`. Without it the agent gets a prompt. |
 | `--no-install` | Suppresses the "Next steps" printout. |
 
+Optional: `--stack-channel` (defaults to `stable`), `--with-agents` / `--no-agents`
+(defaults to no agents when non-interactive).
+
+### Agent skills install
+
+With `--with-agents` (or answering yes to the TTY prompt), the scaffold copies
+these skills into `<app>/.agents/skills/`:
+
+- `android-development`
+- `android-kotlin-compose`
+- `modern-jetpack-compose`
+
 ### Typical workflows
 
 **Start a new single-module feature project:**
 ```sh
-npx create-android my-app \
+npx create-android@0.2.0 my-app \
   --name=MyApp \
   --package=com.mycompany.myapp \
   --arch=single \
+  --stack-channel=stable \
   --no-install
 ```
 
-**Start a multi-module (NowInAndroid-style) project:**
+**Start a multi-module (NowInAndroid-style) project on the edge stack:**
 ```sh
-npx create-android my-app \
+npx create-android@0.2.0 my-app \
   --name=MyApp \
   --package=com.mycompany.myapp \
   --arch=multi \
+  --stack-channel=bleeding-edge \
   --no-install
 ```
 
@@ -91,12 +114,12 @@ npx create-android my-app \
 ### Checking the stack version
 
 ```sh
-npx create-android /tmp/scratch --stack
+npx create-android@0.2.0 --stack
 ```
 
-Returns the pinned AGP, Kotlin, Gradle, compileSdk, etc. for the current
-scaffolder version — useful when the agent needs to know the exact versions
-before writing additional build logic.
+Returns the pinned AGP, Kotlin, Gradle, compileSdk, etc. for both channels —
+useful when the agent needs to know the exact versions before writing additional
+build logic.
 
 ### Notes for agents
 
@@ -117,6 +140,9 @@ before writing additional build logic.
 - Templates live under `templates/<arch>/__name__/`. Path tokens
   (`__name__`) rename to your app name; content tokens (`{{var}}`) are
   replaced with their values from your inputs plus the pinned stack.
+- Stack pins live in `stack/stable.json` and `stack/bleeding-edge.json`.
+- Optional agent skills ship under `assets/agents/skills/` and are copied
+  into the project when requested.
 
 ## Development
 
@@ -124,7 +150,13 @@ before writing additional build logic.
 bun install
 bun test
 bun run scripts/check-snapshot.ts
-bun run src/cli.ts /tmp/out --name=Smoke --package=com.example.smoke --arch=multi --no-install
+bun run src/cli.ts /tmp/out \
+  --name=Smoke \
+  --package=com.example.smoke \
+  --arch=multi \
+  --stack-channel=stable \
+  --with-agents \
+  --no-install
 ```
 
 ## Publish
