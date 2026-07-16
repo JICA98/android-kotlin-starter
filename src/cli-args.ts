@@ -2,6 +2,9 @@ export type Flags = {
   name?: string;
   package?: string;
   arch?: "multi" | "single";
+  stackChannel?: "stable" | "bleeding-edge";
+  withAgents?: boolean;
+  noAgents?: boolean;
   stack?: boolean;
   version?: boolean;
   help?: boolean;
@@ -38,14 +41,42 @@ export function parseArgs(argv: string[]): ParseResult {
       const rawKey = eqIdx >= 0 ? a.slice(2, eqIdx) : a.slice(2);
       const inlineVal = eqIdx >= 0 ? a.slice(eqIdx + 1) : undefined;
 
-      if (rawKey === "stack" || rawKey === "version" || rawKey === "help" || rawKey === "force" || rawKey === "dry-run" || rawKey === "no-install") {
+      if (
+        rawKey === "stack" ||
+        rawKey === "version" ||
+        rawKey === "help" ||
+        rawKey === "force" ||
+        rawKey === "dry-run" ||
+        rawKey === "no-install" ||
+        rawKey === "with-agents" ||
+        rawKey === "no-agents"
+      ) {
         if (inlineVal !== undefined) return { ok: false, error: `flag --${rawKey} does not accept a value` };
         if (rawKey === "dry-run") flags.dryRun = true;
         else if (rawKey === "no-install") flags.noInstall = true;
+        else if (rawKey === "with-agents") flags.withAgents = true;
+        else if (rawKey === "no-agents") flags.noAgents = true;
         else (flags as Record<string, unknown>)[rawKey] = true;
         i++;
         continue;
       }
+
+      if (rawKey === "stack-channel") {
+        let value: string | undefined = inlineVal;
+        if (value === undefined) {
+          value = argv[i + 1];
+          if (value === undefined) return { ok: false, error: `flag --stack-channel requires a value` };
+          if (value.startsWith("-")) return { ok: false, error: `flag --stack-channel requires a value (got ${value})` };
+          i++;
+        }
+        if (value !== "stable" && value !== "bleeding-edge") {
+          return { ok: false, error: `--stack-channel must be "stable" or "bleeding-edge"` };
+        }
+        flags.stackChannel = value;
+        i++;
+        continue;
+      }
+
       const key = rawKey as keyof Flags;
       let value: string | undefined = inlineVal;
       if (value === undefined) {
@@ -76,6 +107,9 @@ export function parseArgs(argv: string[]): ParseResult {
       projectDir = a;
       i++;
     }
+  }
+  if (flags.withAgents && flags.noAgents) {
+    return { ok: false, error: "flags --with-agents and --no-agents are mutually exclusive" };
   }
   if (flags.arch && flags.arch !== "multi" && flags.arch !== "single") {
     return { ok: false, error: `--arch must be "multi" or "single"` };

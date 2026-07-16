@@ -44,4 +44,31 @@ describe("parseArgs", () => {
     expect(v.flags.dryRun).toBe(true);
     expect(v.flags.force).toBe(true);
   });
+
+  test("parses --stack-channel", () => {
+    const v = ok(parseArgs(["--stack-channel", "bleeding-edge"]));
+    expect(v.flags.stackChannel).toBe("bleeding-edge");
+  });
+
+  test("parses --stack-channel=stable equals form", () => {
+    const v = ok(parseArgs(["--stack-channel=stable"]));
+    expect(v.flags.stackChannel).toBe("stable");
+  });
+
+  test("rejects invalid --stack-channel", () => {
+    const v = parseArgs(["--stack-channel", "nightly"]);
+    expect(v.ok).toBe(false);
+    if (!v.ok) expect(v.error).toMatch(/stack-channel/);
+  });
+
+  test("parses --with-agents and --no-agents", () => {
+    expect(ok(parseArgs(["--with-agents"])).flags.withAgents).toBe(true);
+    expect(ok(parseArgs(["--no-agents"])).flags.noAgents).toBe(true);
+  });
+
+  test("rejects --with-agents and --no-agents together", () => {
+    const v = parseArgs(["--with-agents", "--no-agents"]);
+    expect(v.ok).toBe(false);
+    if (!v.ok) expect(v.error).toMatch(/with-agents|no-agents/);
+  });
 });
