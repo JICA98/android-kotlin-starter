@@ -84,4 +84,50 @@ describe("runCreate", () => {
     });
     expect(res.exitCode).toBe(0);
   });
+
+  test("withAgents copies all three skills under .agents/skills", async () => {
+    const out = join(cwd, "AgentsApp");
+    const res = await runCreate({
+      repoRoot,
+      inputs: {
+        projectDir: out,
+        name: "AgentsApp",
+        package: "com.example.agents",
+        arch: "single",
+        stackChannel: "stable",
+        withAgents: true,
+      },
+      isTTY: false,
+      noInstall: true,
+    });
+    expect(res.exitCode).toBe(0);
+    for (const skill of [
+      "android-development",
+      "android-kotlin-compose",
+      "modern-jetpack-compose",
+    ]) {
+      const skillMd = join(out, "AgentsApp", ".agents", "skills", skill, "SKILL.md");
+      const st = await stat(skillMd);
+      expect(st.isFile()).toBe(true);
+    }
+  });
+
+  test("withAgents false does not create .agents", async () => {
+    const out = join(cwd, "NoAgents");
+    const res = await runCreate({
+      repoRoot,
+      inputs: {
+        projectDir: out,
+        name: "NoAgents",
+        package: "com.example.noagents",
+        arch: "single",
+        stackChannel: "stable",
+        withAgents: false,
+      },
+      isTTY: false,
+      noInstall: true,
+    });
+    expect(res.exitCode).toBe(0);
+    await expect(stat(join(out, "NoAgents", ".agents"))).rejects.toBeDefined();
+  });
 });

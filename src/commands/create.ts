@@ -1,4 +1,5 @@
 import { renderTemplate } from "../scaffold/render";
+import { copyAgentsSkills } from "../scaffold/copy-agents";
 import { loadSnapshot, formatSnapshotBanner, type Snapshot } from "../stack/snapshot";
 import { isSensitiveProjectDir } from "../scaffold/projectdir";
 import { deriveTokens, type Tokens } from "../scaffold/tokens";
@@ -102,6 +103,19 @@ export async function runCreate(opts: CreateOpts): Promise<CreateResult> {
   }
 
   await renderTemplate({ templateRoot, outDir: targetDir, tokens });
+
+  if (inputs.withAgents) {
+    const skillsRoot = join(repoRoot, "assets", "agents", "skills");
+    try {
+      await stat(skillsRoot);
+    } catch {
+      err(`agent skills missing at ${skillsRoot}; reinstall create-android`);
+      return { exitCode: 1, stdout: "", stderr: "missing agents assets" };
+    }
+    const dest = join(targetDir, inputs.name, ".agents", "skills");
+    await copyAgentsSkills({ skillsRoot, destSkillsDir: dest });
+    ok(`Installed agent skills → ${inputs.name}/.agents/skills`);
+  }
 
   ok(`Created ${targetDir}/${inputs.name} from template ${inputs.arch}`);
   header(`Stack: ${formatSnapshotBanner(snap, inputs.stackChannel)}`);

@@ -5,7 +5,7 @@
   "type": "module",
   "bin": { "create-android": "./bin/shim.js" },
   "engines": { "node": ">=18" },
-  "files": ["bin", "templates", "stack", "README.md", "LICENSE"],
+  "files": ["bin", "templates", "stack", "assets", "README.md", "LICENSE"],
   "optionalDependencies": {
     "create-android-darwin-arm64": "0.0.0-dev",
     "create-android-darwin-x64": "0.0.0-dev",
